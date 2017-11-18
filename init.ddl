@@ -15,22 +15,22 @@ orig_country	VARCHAR,
 
 CREATE TABLE flight(
 airlineCode 	VARCHAR(2),
-number		NUMBER,
+number		NUMERIC,
 date		DATE,
 depart_loc	VARCHAR(3),
 dest_loc	VARCHAR(3),
 depart_time	TIME,
 arrival_time	TIME,
-fc_capacity	NUMBER,
-econ_capacity	NUMBER
+fc_capacity	NUMERIC,
+econ_capacity	NUMERIC
 );
 
 CREATE TABLE price(
 airlineCode	VARCHAR(2),
-flight_number	NUMBER,
+flight_number	NUMERIC,
 flight_date	DATE
-fc_price	NUMBER,
-econ_price	NUMBER,
+fc_price	NUMERIC,
+econ_price	NUMERIC,
 FOREIGN KEY (airlineCode,flight_number,flight_date) REFERENCES flight (airlineCode,flight_number,flight_date)
 );
 
@@ -43,17 +43,17 @@ home_country	VARCHAR
 );
 
 CREATE TABLE creditCard(
-number		NUMBER PRIMARY KEY
+number		NUMERIC PRIMARY KEY
 );
 CREATE TABLE address( -- Can we come up with a better way to store this?
 street		VARCHAR,
 city		VARCHAR,
 state		VARCHAR,
 country		VARCHAR,
-zip		NUMBER
+zip		NUMERIC
 );
 
 CREATE TABLE booking(
 class		VARCHAR,
-paymentCard	NUMBER NOT NULL
+paymentCard	NUMERIC NOT NULL
 );
