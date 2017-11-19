@@ -39,7 +39,8 @@ email		VARCHAR	PRIMARY KEY,
 first_name	VARCHAR,
 middle_init	VARCHAR(1),
 last_name	VARCHAR,
-home_country	VARCHAR
+home		VARCHAR(3),
+FOREIGN KEY (home) REFERENCES flight (airlineCode)
 );
 
 CREATE TABLE creditCard(
