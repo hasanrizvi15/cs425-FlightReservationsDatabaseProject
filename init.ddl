@@ -17,22 +17,15 @@ CREATE TABLE airline(
 CREATE TABLE flight(
 	airlineCode 	VARCHAR(2),
 	number			NUMERIC,
-	date			DATE,
+	flight_date		DATE,
 	depart_loc		VARCHAR(3),
 	dest_loc		VARCHAR(3),
 	depart_time		TIME,
 	arrival_time	TIME,
 	fc_capacity		NUMERIC,
-	econ_capacity	NUMERIC
-);
-
-CREATE TABLE price(
-	airlineCode		VARCHAR(2),
-	flight_number	NUMERIC,
-	flight_date		DATE
-	fc_price		NUMERIC,
-	econ_price		NUMERIC,
-	FOREIGN KEY (airlineCode,flight_number,flight_date) REFERENCES flight (airlineCode,flight_number,flight_date)
+	econ_capacity	NUMERIC,
+	fc_price		NUMBERIC,
+	econ_price		NUMBERIC
 );
 
 CREATE TABLE customer(
