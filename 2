@@ -11,7 +11,7 @@ CREATE TABLE airport(
 
 CREATE TABLE airline(
 	code			VARCHAR(2) PRIMARY KEY,
-	orig_country	VARCHAR
+	orig_country	VARCHAR,
 );
 
 CREATE TABLE flight(
@@ -45,6 +45,13 @@ CREATE TABLE customer(
 	FOREIGN KEY (home_airport) REFERENCES airport (id)
 );
 
+CREATE TABLE creditCard(
+	number			NUMERIC PRIMARY KEY,
+	user			VARCHAR,
+	userAddress		NUMERIC,	
+	FOREIGN KEY (user) REFERENCES customer (email),
+	FOREIGN KEY (userAddress)	REFERENCES address (address_id)
+);
 CREATE TABLE address( -- Can we come up with a better way to store this?
 	address_id		NUMERIC PRIMARY KEY,
 	street			VARCHAR,
@@ -52,24 +59,17 @@ CREATE TABLE address( -- Can we come up with a better way to store this?
 	state			VARCHAR,
 	country			VARCHAR,
 	zip				NUMERIC,
-	user_			VARCHAR,
+	user			VARCHAR,
 	CONSTRAINT unique_address UNIQUE(street,city,state,country,zip),
-	FOREIGN KEY (user_) REFERENCES customer (email)
+	FOREIGN KEY (user) REFERENCES customer (email)
 );
 
-CREATE TABLE creditCard(
-	number			NUMERIC PRIMARY KEY,
-	user_			VARCHAR,
-	userAddress		NUMERIC,	
-	FOREIGN KEY (user_) REFERENCES customer (email),
-	FOREIGN KEY (userAddress)	REFERENCES address (address_id)
-);
 CREATE TABLE booking(
 	id				NUMERIC PRIMARY KEY,
 	class			VARCHAR,
 	paymentCard		NUMERIC,
-	user_			VARCHAR,
-	FOREIGN KEY (user_) REFERENCES customer (email), 
+	user			VARCHAR,
+	FOREIGN KEY (user) REFERENCES customer (email), 
 	FOREIGN KEY (paymentCard) REFERENCES creditCard(number)
 );
 
