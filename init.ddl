@@ -1,6 +1,7 @@
 -- Note: Relationships between tables have not been created yet.
 --	 This is by no means a final rendition.
-
+-- Customer and booking should be a many-to-one relationship, not a one-to-one (a Customer should be able to have
+-- multiple bookings in the database).
 
 CREATE TABLE airport(
 	id				VARCHAR(3) PRIMARY KEY,
