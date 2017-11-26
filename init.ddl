@@ -83,8 +83,10 @@ CREATE TABLE booking_flight(
 	FOREIGN KEY (bookingID) REFERENCES booking (id),
 	FOREIGN KEY	(airline_code,flight_number,flight_date) REFERENCES flight(airline_code,flight_number,flight_date)
 );		
+INSERT INTO airport (id,name,country,state) VALUES ('ATL','Hartsfield-Jackson Atlanta International Airport','USA','GA'),('PHX','Phoenix Sky Harbor International Airport','USA','AZ'), ('LAX','Los Angeles International Airport','USA','CA'),('ORD','Chicago O''Hare International Airport','USA','IL'),('DFW','Dallas/Fort Worth International Airport','USA','TX');
+INSERT INTO airport (id,name,country,state) VALUES ('DEN','Denver International Airport','USA','CO'),('JFK','John F. Kennedy International Airport','USA','NY'),('SFO','San Francisco International Airport','USA','CA'),('CLT','Charlotte/Douglas International Airport','USA','NC'),('SEA','Seattle-Tacoma International Airport','USA','WA');
 
-
+INSERT INTO airline (code,name,orig_country) VALUES ('AS','Alaska Airlines','USA'),('G4','Allegiant Air','USA'),('AA','American Airlines','USA'),('DL','Delta Air Lines','USA'),('F9','Frontier Airlines','USA'),('HA','Hawaiian Airlines','USA'),('B6','JetBlue Airways','USA'),('WN','Southwest Airlines','USA'),('NK','Spirit Airlines','USA'),('SY','Sun Country Airlines','USA'),('UA','United Airlines','USA'),('VX','Virgin America','USA');
 
 
 

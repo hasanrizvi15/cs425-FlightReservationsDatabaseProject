@@ -27,27 +27,60 @@
 
 
 import re
+import psycopg2
+conn = psycopg2.connect("dbname='postgres' user='zmckee' host='cs425.cc0vhnbhtoib.us-east-2.rds.amazonaws.com' password='K?JQRD5<G>TV8CX:A8;G'")
+cursor = conn.cursor()
+	
 
+# Populate the airports list, either with live data from the database or crap garbage data
+try:
+	cursor.execute("SELECT id FROM airport")
+	airports = [airport[0] for airport in cursor.fetchall()]
 
-# Airports should be populated by an SQL statement along the lines of SELECT id FROM airport.
-# This is plausible data for the use in testing.;
-airports = ["ORD","MDW","MLI","PIA","DTW","JFK","SEA"]
+	print("Airports loaded from database.")
+
+	i = 0
+	for a in airports: # Debug: Print out all airports retrieved from database
+		if i < 8:
+			print(a,end=" ")
+		else:
+			print("",end="\n") # print a new line
+			print(a,end=" ")
+			i = 0
+			continue
+		i += 1
+	print("")
+
+except:
+	print("Could not retrieve airport IDs from database. Defaulting to builtin list")
+	airports = ["ORD","MDW","MLI","PIA","DTW","JFK","SEA"]
+
 users = []
-def customerLogin():
+
+
+def initialPrompt():
 
 	newUser = input("Enter R[egister] for registration, anything else for login: ")
 	regex = re.compile('R.*',re.IGNORECASE) # Matches any string input beginning with R
 	if(regex.match(newUser)): # This will initiate if the user requests registration (by typing in R followed by any other text
 		customerRegister()
+	else:
+		customerLogin()
+
+def customerLogin():
+
 	print("^+^+^ User Login ^+^+^")
 	userName = input("Enter Username: ")
-	if userName in [i[0] for i in users]:
-		print("Login Successful -- welcome!")
+	cmd = "SELECT first_name FROM customer WHERE email=%s"
+	cursor.execute(cmd,(userName,))
+	user = cursor.fetchall()[0][0]
+	if user:
+		print("Login Successful -- welcome, " + user + "!")
 	return;
 
 
 
-#	2)
+#12	2)
 #	A function that is used to query and
 #	manipulate the database once said user
 #	is logged in. This will be what is used to 
@@ -57,11 +90,17 @@ def customerLogin():
 def insertData(typeOfInsertion,*args):
 	if(typeOfInsertion == "REG"):
 		# insert into database a new customer
-		users.append((args[0],args[1],args[2],args[3],args[4]))
-		
-	return 1;
-
-
+		cmd = "INSERT INTO customer (email,first_name,middle_init,last_name,home_airport) VALUES (%s,%s,%s,%s,%s);"
+		for i in args:
+			print(i)
+		try:
+			cursor.execute(cmd,(args[0],args[1],args[2],args[3],args[4]))
+		except:
+			print("Could not insert new user into database")
+		conn.commit()
+		#users.append((args[0],args[1],args[2],args[3],args[4]))
+		return;
+	return;
 	
 def customerRegister():
 	print("-=-=- New Customer Registration -=-=-")
@@ -91,4 +130,4 @@ def customerRegister():
 	insertData("REG",email,first,middle,last,home)
 	print("Registration complete, you will now be brought to the login prompt.")
 if __name__ == "__main__":
-	customerLogin()
+	initialPrompt()
