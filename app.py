@@ -70,13 +70,19 @@ def initialPrompt():
 def customerLogin():
 
 	print("^+^+^ User Login ^+^+^")
-	userName = input("Enter Username: ")
-	cmd = "SELECT first_name FROM customer WHERE email=%s"
-	cursor.execute(cmd,(userName,))
-	user = cursor.fetchall()[0][0]
-	if user:
-		print("Login Successful -- welcome, " + user + "!")
-	return;
+	while True:
+		userName = input("Enter Username: ")
+		cmd = "SELECT first_name FROM customer WHERE email=%s"
+		cursor.execute(cmd,(userName,))
+		try:
+			user = cursor.fetchall()[0][0]
+		except:
+			print("Authentication failed. Please try again.")
+			user = False
+			
+		if user:
+			print("Login Successful -- welcome, " + user + "!")
+			return;
 
 
 
