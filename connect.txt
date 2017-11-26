@@ -1,0 +1,13 @@
+MASTER PASSWORD :: K?JQRD5<G>TV8CX:A8;G
+
+LINUX/UBUNTU: PASTE THE BELOW INFORMATION INTO THE TERMINAL.
+
+psql \
+   --host=cs425.cc0vhnbhtoib.us-east-2.rds.amazonaws.com \
+   --port=5432 \
+   --username=zmckee \
+   --password \
+   --dbname=postgres 
+
+
+Otherwise, you can use pgAdmin to connect to the database and look at the tables.
