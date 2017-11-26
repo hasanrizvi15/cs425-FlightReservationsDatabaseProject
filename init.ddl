@@ -5,12 +5,14 @@
 
 CREATE TABLE airport(
 	id				VARCHAR(3) PRIMARY KEY,
+	name			VARCHAR,
 	country			VARCHAR,
 	state			VARCHAR(2)
 );
 
 CREATE TABLE airline(
 	code			VARCHAR(2) PRIMARY KEY,
+	name               VARCHAR,
 	orig_country	VARCHAR
 );
 
@@ -81,6 +83,11 @@ CREATE TABLE booking_flight(
 	FOREIGN KEY (bookingID) REFERENCES booking (id),
 	FOREIGN KEY	(airline_code,flight_number,flight_date) REFERENCES flight(airline_code,flight_number,flight_date)
 );		
+
+
+
+
+
 
 
 
