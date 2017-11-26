@@ -87,7 +87,7 @@ def customerLogin():
 #	insert credit card information, addresses, book
 #	flights, etc.
 
-def insertData(typeOfInsertion,*args):
+def insertData(typeOfInsertion,*args): # Return False on insertion fail, True otherwise
 	if(typeOfInsertion == "REG"):
 		# insert into database a new customer
 		cmd = "INSERT INTO customer (email,first_name,middle_init,last_name,home_airport) VALUES (%s,%s,%s,%s,%s);"
@@ -95,39 +95,46 @@ def insertData(typeOfInsertion,*args):
 			print(i)
 		try:
 			cursor.execute(cmd,(args[0],args[1],args[2],args[3],args[4]))
-		except:
+		except Exception as error:
+
 			print("Could not insert new user into database")
+			print(error)
+			conn.commit()
+			return False;
 		conn.commit()
 		#users.append((args[0],args[1],args[2],args[3],args[4]))
-		return;
+		return True;
 	return;
 	
 def customerRegister():
 	print("-=-=- New Customer Registration -=-=-")
-	print("You will be prompted for an email address, first name, middle initial,\n" +
-	      "last name, and home airport (identified by its 3-character ID code).\n"	+  
-	      "You can add payment information/addresses on initial login.")
-	
-	validEmails  = re.compile('^(.+)@(.+)\.(\w+)$',re.IGNORECASE) 	# Regex expression used to 
-									# validate email address input
-	email 	= input("Enter email: ")
-	while(validEmails.match(email) == None): # If the email is invalid
-		print("'" + email + "'" + " is not a valid email.")
-		email = input("Enter a valid email: ")	
-	
-	first 	= input("Enter first name: ")
+	registered=False
+	while(not registered):
+		print("You will be prompted for an email address, first name, middle initial,\n" +
+		      "last name, and home airport (identified by its 3-character ID code).\n"	+  
+		      "You can add payment information/addresses on initial login.")
+		
+		validEmails  = re.compile('^(.+)@(.+)\.(\w+)$',re.IGNORECASE) 	# Regex expression used to 
+										# validate email address input
+		email 	= input("Enter email: ")
+		while(validEmails.match(email) == None): # If the email is invalid
+			print("'" + email + "'" + " is not a valid email.")
+			email = input("Enter a valid email: ")	
+		
+		first 	= input("Enter first name: ")
 
-	middle 	= input("Enter middle initial: ")
+		middle 	= input("Enter middle initial: ")
 
-	last 	= input("Enter last name: ")
-	
-	# An airport must exist before a customer can call it their home
-	
-	home 	= input("Enter home airport: ")
-	while(home not in airports):
-		print("'" + home + "'" + "does not exist.")
-		home = input("Enter a valid home airport: ")
-	insertData("REG",email,first,middle,last,home)
+		last 	= input("Enter last name: ")
+		
+		# An airport must exist before a customer can call it their home
+		
+		home 	= input("Enter home airport: ")
+		while(home not in airports):
+			print("'" + home + "'" + "does not exist.")
+			home = input("Enter a valid home airport: ")
+		registered = insertData("REG",email,first,middle,last,home)
 	print("Registration complete, you will now be brought to the login prompt.")
+	customerLogin()
 if __name__ == "__main__":
 	initialPrompt()
