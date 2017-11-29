@@ -48,7 +48,7 @@ CREATE TABLE customer(
 );
 
 CREATE TABLE address( -- Can we come up with a better way to store this?
-	address_id		NUMERIC PRIMARY KEY,
+	address_id		SERIAL PRIMARY KEY,
 	street			VARCHAR,
 	city			VARCHAR,
 	state			VARCHAR,
