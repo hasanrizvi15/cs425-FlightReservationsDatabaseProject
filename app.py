@@ -170,7 +170,7 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
 	elif(typeOfInsertion == "PAYM"):
 	    return True 
 	
-
+# Handle deletions/removals from tables
 def removeData(typeOfDeletion, pkey):
 	if(typeOfDeletion == "ADDR"):
 		cmd = "DELETE FROM address WHERE address_id={}".format(pkey)
