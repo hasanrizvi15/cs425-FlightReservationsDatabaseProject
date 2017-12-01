@@ -55,14 +55,13 @@ CREATE TABLE address( -- Can we come up with a better way to store this?
 	country			VARCHAR,
 	zip				NUMERIC,
 	user_			VARCHAR,
-	CONSTRAINT unique_address UNIQUE(street,city,state,country,zip),
 	FOREIGN KEY (user_) REFERENCES customer (email)
 );
 
 CREATE TABLE creditCard(
 	number			NUMERIC PRIMARY KEY,
 	user_			VARCHAR,
-	userAddress		NUMERIC,	
+	userAddress		SERIAL NOT NULL,	
 	FOREIGN KEY (user_) REFERENCES customer (email),
 	FOREIGN KEY (userAddress)	REFERENCES address (address_id)
 );
