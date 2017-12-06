@@ -367,7 +367,7 @@ def searchFlights(user):
     desAirport = 0
     depDate = 0
     retDate = 0
-    maxtime = 0
+    maxTime = 0
     maxPrice = 0
     maxConnections = 0
     roundTrip = 0
@@ -396,6 +396,22 @@ def searchFlights(user):
     print("You can search for flights now or provide additional data to refine your search.")
     searched = False
     while(not searched):
+        formatter = "{:<15}"
+
+        print("\033c")
+        print("""
+        ╔═════════════════════╦════════════════╗
+        ║ Origin Airport      ║ {}║
+        ║ Destination Airport ║ {}║
+        ║ Departure Date      ║ {}║
+        ║ Return Date         ║ {}║
+        ║ Maximum Trip Time   ║ {}║
+        ║ Maximum Price       ║ {}║
+        ║ Maximum Connections ║ {}║
+        ╚═════════════════════╩════════════════╝\n
+        """.format(formatter.format(depAirport),formatter.format(desAirport),
+            formatter.format(depDate),formatter.format(retDate),formatter.format(maxTime),
+            formatter.format(maxPrice),formatter.format(maxConnections)))
         print("Enter [S] to search now, [P] to provide a maximum price, [C] to specify a maximum number of connections,\n" +
               "or [T] to specify a maximum trip time.")
         argument = input("[?]: ")
