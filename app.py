@@ -175,6 +175,19 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
         return True
 
     elif(typeOfInsertion == "PAYM"):
+        cmd = "INSERT INTO creditCard (number,user_,useraddress) VALUES (%s,%s,%s)"
+        for i in args:
+            print(i)
+
+        try:
+            cursor.execute(cmd,(args[0],args[1],args[2]))
+        except Exception as error:
+            print("Could not insert new card into database")
+            print(error)
+            conn.commit()
+            time.sleep(4)
+            return False
+        conn.commit()
         return True 
     
 # Handle deletions/removals from tables
@@ -191,7 +204,20 @@ def removeData(typeOfDeletion, pkey):
             return False
         conn.commit()
         return True 
+    if(typeOfDeletion == "PAYM"):
+        cmd = "DELETE FROM creditCard WHERE number= %s"
+        try:
+            cursor.execute(cmd,(pkey,))
+        except Exception as error:
+            print("Could not remove card from database")
+            print(error)
+            conn.commit()
+            time.sleep(4)
+            return False
+        conn.commit()
+        return True
     return
+
     
 def customerRegister():
     print("-=-=- New Customer Registration -=-=-")
@@ -300,9 +326,10 @@ def paymentHandler(user):
             for addr in addresses: 
                 print("[{}]: {}, {}, {}, {}, {}".format(i, addr[1], addr[2], addr[3], addr[4], addr[5]))
                 i += 1
-
-            userAddr = int(input("[?]: "))
-            if (userAddr in range(len(addresses))):
+            userIndex = int(input("[?]: "))
+            userAddr = addresses[userIndex][0]
+            success = 0
+            if (userIndex in range(len(addresses))):
                 success = insertData("PAYM", ccNumber, user[0], userAddr)   # ordered according to the ddl script
         except Exception as error:
             print("Could not find any address in your records, please add one.")
@@ -311,7 +338,9 @@ def paymentHandler(user):
     elif (option.lower() == "r"):
         try:
             cursor.execute("SELECT number FROM creditCard WHERE user_='{}'".format(user[0]))
+        
             ccards = cursor.fetchall()
+            print(ccards)
             print("Displaying credit cards, please select the card to be removed\n")
             i = 0
             for cc in ccards: 
