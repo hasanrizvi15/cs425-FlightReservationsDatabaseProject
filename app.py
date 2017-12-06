@@ -255,11 +255,12 @@ def addressHandler(user):
         try:
             cursor.execute("SELECT * FROM address WHERE user_='{}'".format(user[0]))
             addresses = cursor.fetchall()
-            print("Displaying current addresses, please select the address to be removed")
+            print("Displaying current addresses, please select the address to be removed\n")
             i = 0
             for addr in addresses: 
-                print("[{}]: {}, {}, {}, {}. {}".format(i, addr[1], addr[2], addr[3], addr[4], addr[5]))
+                print("[{}]: {}, {}, {}, {}, {}".format(i, addr[1], addr[2], addr[3], addr[4], addr[5]))
                 i += 1
+
             idx = int(input("[?]: "))
             if(idx <= i and idx >=0):
                 success = removeData("ADDR", addresses[idx][0])
@@ -290,11 +291,38 @@ def paymentHandler(user):
 
     option = input()
     if (option.lower() == "a"):
-        # TODO
-        insertData("ADDR", )   
+        ccNumber = input("Enter CC number: ")
+        try:
+            cursor.execute("SELECT * FROM address WHERE user_='{}'".format(user[0]))
+            addresses = cursor.fetchall()
+            print("Displaying current addresses, please select the address number to add to payment info.\n")
+            i = 0
+            for addr in addresses: 
+                print("[{}]: {}, {}, {}, {}, {}".format(i, addr[1], addr[2], addr[3], addr[4], addr[5]))
+                i += 1
+
+            userAddr = int(input("[?]: "))
+            if (userAddr in range(len(addresses))):
+                success = insertData("PAYM", ccNumber, user[0], userAddr)   # ordered according to the ddl script
+        except Exception as error:
+            print("Could not find any address in your records, please add one.")
+            customerMenu(user)
+  
     elif (option.lower() == "r"):
-        # TODO
-        removeData("ADDR", )   
+        try:
+            cursor.execute("SELECT number FROM creditCard WHERE user_='{}'".format(user[0]))
+            ccards = cursor.fetchall()
+            print("Displaying credit cards, please select the card to be removed\n")
+            i = 0
+            for cc in ccards: 
+                print("[{}]: {}".format(i, cc[0]))
+                i += 1
+
+            idx = int(input("[?]: "))
+            if(idx in range(len(ccards))):
+                success = removeData("PAYM", ccards[idx][0])
+        except Exception as error:
+            print(error)   
     else:
         print("Invalid choice, returning to main menu.")
 
@@ -302,6 +330,7 @@ def paymentHandler(user):
         print("Update successful")
     else:
         print("Update failed")
+        
     print("Returning to main menu.")
     time.sleep(2)
     customerMenu(user)
