@@ -91,7 +91,6 @@ def customerMenu(user):
     switch = {"1": addressHandler, 
               "2": paymentHandler, 
               "3": searchFlights, 
-              "4": bookFlight, 
               "q": initialPrompt}
 
     print("\033c")
@@ -108,8 +107,6 @@ def customerMenu(user):
         |__________|_______________________________________|
         |   (3)    | Search Flights                        |
         |__________|_______________________________________|
-        |   (4)    | Book Flight                           |
-        |__________|_______________________________________|
         |   (q)    | QUIT                                  |
         |__________|_______________________________________| \n"""
 
@@ -125,9 +122,8 @@ def customerMenu(user):
                     print("\033c")
                     switch[option]()
         else:
-            time.sleep(2)
             print("Invalid option \n")
-
+            time.sleep(2)
 
         print("\033c")
 
@@ -354,7 +350,8 @@ def paymentHandler(user):
             print(error)   
     else:
         print("Invalid choice, returning to main menu.")
-
+        time.sleep(2)
+        customerMenu(user)
     if (success): 
         print("Update successful")
     else:
@@ -366,7 +363,33 @@ def paymentHandler(user):
 
 # Handle flight search
 def searchFlights(user):
-    return
+    depAirport = 0
+    desAirport = 0
+    depDate = 0
+    retDate = 0
+    maxtime = 0
+    maxPrice = 0
+    maxConnections = 0
+    roundTrip = 0
+    yesNoReader = re.compile('^(Y|N).*')
+    print("Please enter a departure airport (3-letter code).")
+    depAirport = input("[?]: ")
+    print("Please enter a destination airport (3-letter code).")
+    destAirport = input("[?]: ")
+    print("Please enter a departure date")
+    depDate = input("[?]: ")
+    print("Do you want to book round-trip? Type [Y]es or [N]o.")
+    userin = input("[?]: ")
+    while(not yesNoReader.match(userin)):
+        print("Invalid input, please try again.")
+        print("Do you want to book round-trip? Type [Y]es or [N]o.")
+        userin = input("[?]: ")
+    if(userin[0].upper()  == "Y"):
+        roundTrip = 1
+    else:
+        roundTrip = 0
+    
+    
 
 # Handle booking
 def bookFlight(user):
