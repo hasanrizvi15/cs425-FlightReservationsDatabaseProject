@@ -394,10 +394,26 @@ def searchFlights(user):
         print("Please enter a return date")
         retDate = input("[?]: ")
     print("You can search for flights now or provide additional data to refine your search.")
-    print("Enter [S] to search now, [P] to provide a maximum price, [C] to specify a maximum number of connections,\n" +
-          "or [T] to specify a maximum trip time.")
-    # TODO    
-
+    searched = False
+    while(not searched):
+        print("Enter [S] to search now, [P] to provide a maximum price, [C] to specify a maximum number of connections,\n" +
+              "or [T] to specify a maximum trip time.")
+        argument = input("[?]: ")
+        if(argument.upper() == "S"):
+            searched = True
+        elif(argument.upper() == "P"):
+            print("Please enter your maximum price")
+            maxPrice = input("[?]: ")
+        elif(argument.upper() == "C"):
+            print("Please enter your maximum number of connections")
+            maxConnections = input("[?]: ")
+        elif(argument.upper() == "T"):
+            print("Please enter your maximum trip time (in hours)")
+            maxTime = input("[?]: ")
+        else:
+            print("Invalid entry, please retry.")
+    print("Beginning search query.")
+    time.sleep(2)
 # Handle booking
 def bookFlight(user):
     return
