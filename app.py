@@ -332,6 +332,7 @@ def paymentHandler(user):
             customerMenu(user)
   
     elif (option.lower() == "r"):
+        success = 0
         try:
             cursor.execute("SELECT number FROM creditCard WHERE user_='{}'".format(user[0]))
         
@@ -342,7 +343,6 @@ def paymentHandler(user):
             for cc in ccards: 
                 print("[{}]: {}".format(i, cc[0]))
                 i += 1
-
             idx = int(input("[?]: "))
             if(idx in range(len(ccards))):
                 success = removeData("PAYM", ccards[idx][0])
