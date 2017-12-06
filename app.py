@@ -372,10 +372,12 @@ def searchFlights(user):
     maxConnections = 0
     roundTrip = 0
     yesNoReader = re.compile('^(Y|N).*')
-    print("Please enter a departure airport (3-letter code).")
-    depAirport = input("[?]: ")
-    print("Please enter a destination airport (3-letter code).")
-    destAirport = input("[?]: ")
+    while(depAirport not in airports):
+        print("Please enter a departure airport (3-letter code).")
+        depAirport = input("[?]: ")
+    while(desAirport not in airports):
+        print("Please enter a destination airport (3-letter code).")
+        desAirport = input("[?]: ")
     print("Please enter a departure date")
     depDate = input("[?]: ")
     print("Do you want to book round-trip? Type [Y]es or [N]o.")
@@ -388,8 +390,13 @@ def searchFlights(user):
         roundTrip = 1
     else:
         roundTrip = 0
-    
-    
+    if(roundTrip):
+        print("Please enter a return date")
+        retDate = input("[?]: ")
+    print("You can search for flights now or provide additional data to refine your search.")
+    print("Enter [S] to search now, [P] to provide a maximum price, [C] to specify a maximum number of connections,\n" +
+          "or [T] to specify a maximum trip time.")
+    # TODO    
 
 # Handle booking
 def bookFlight(user):
