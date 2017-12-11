@@ -26,6 +26,7 @@
 #   function that allows the user to create an account.
 
 import time
+import datetime
 import re
 import psycopg2
 conn = psycopg2.connect("dbname='postgres' user='zmckee' host='cs425.cc0vhnbhtoib.us-east-2.rds.amazonaws.com' password='K?JQRD5<G>TV8CX:A8;G'")
@@ -94,21 +95,23 @@ def customerMenu(user):
               "q": initialPrompt}
 
     print("\033c")
-    print("#@#@#@# " + user[1] + "'s" + " User Menu #@#@#@")
+    print("  #@#@#@# " + user[1] + "'s" + " User Menu #@#@#@\n")
 
     menu = """  Please select an option from the list:
 
-         __________________________________________________
-        | OPTION   | DESCRIPTION                           |
-        |__________|_______________________________________|
-        |   (1)    | Manage Addresses                      |
-        |__________|_______________________________________|
-        |   (2)    | Manage Payment Methods                |
-        |__________|_______________________________________|
-        |   (3)    | Search Flights                        |
-        |__________|_______________________________________|
-        |   (q)    | QUIT                                  |
-        |__________|_______________________________________| \n"""
+           __________________________________________________
+         /| OPTION   | DESCRIPTION                           |
+        / |__________|_______________________________________| 
+        | |   (1)    | Manage Addresses                      | 
+        | |__________|_______________________________________| 
+        | |   (2)    | Manage Payment Methods                | 
+        | |__________|_______________________________________| 
+        | |   (3)    | Search Flights                        | 
+        | |__________|_______________________________________| 
+        | |   (q)    | QUIT                                  | 
+        | |__________|_______________________________________| 
+        | /                                                  / 
+        |/__________________________________________________/ \n"""
 
     while (1):
         print(menu)
@@ -328,8 +331,7 @@ def paymentHandler(user):
             if (userIndex in range(len(addresses))):
                 success = insertData("PAYM", ccNumber, user[0], userAddr)   # ordered according to the ddl script
         except Exception as error:
-            print("Could not find any address in your records, please add one.")
-            customerMenu(user)
+            print(error)
   
     elif (option.lower() == "r"):
         success = 0
@@ -361,15 +363,20 @@ def paymentHandler(user):
     time.sleep(2)
     customerMenu(user)
 
+# Handle bookings
+def bookFlight(user):
+    return
+
+
 # Handle flight search
 def searchFlights(user):
     depAirport = 0
     desAirport = 0
     depDate = 0
     retDate = 0
-    maxTime = 0
-    maxPrice = 0
-    maxConnections = 0
+    maxTime = float('inf')
+    maxPrice = float('inf')
+    maxConnections = float('inf')
     roundTrip = 0
     yesNoReader = re.compile('^(Y|N).*')
     while(depAirport not in airports):
@@ -378,7 +385,7 @@ def searchFlights(user):
     while(desAirport not in airports):
         print("Please enter a destination airport (3-letter code).")
         desAirport = input("[?]: ")
-    print("Please enter a departure date")
+    print("Please enter a departure date as YYYY-MM-DD")
     depDate = input("[?]: ")
     print("Do you want to book round-trip? Type [Y]es or [N]o.")
     userin = input("[?]: ")
@@ -391,7 +398,7 @@ def searchFlights(user):
     else:
         roundTrip = 0
     if(roundTrip):
-        print("Please enter a return date")
+        print("Please enter a return date as YYYY-MM-DD")
         retDate = input("[?]: ")
     print("You can search for flights now or provide additional data to refine your search.")
     searched = False
@@ -401,7 +408,7 @@ def searchFlights(user):
         print("\033c")
         print("""
         ╔═════════════════════╦════════════════╗
-        ║ Origin Airport      ║ {}║
+        ║ Origin Airport      ║ {}║              
         ║ Destination Airport ║ {}║
         ║ Departure Date      ║ {}║
         ║ Return Date         ║ {}║
@@ -412,8 +419,7 @@ def searchFlights(user):
         """.format(formatter.format(depAirport),formatter.format(desAirport),
             formatter.format(depDate),formatter.format(retDate),formatter.format(maxTime),
             formatter.format(maxPrice),formatter.format(maxConnections)))
-        print("Enter [S] to search now, [P] to provide a maximum price, [C] to specify a maximum number of connections,\n" +
-              "or [T] to specify a maximum trip time.")
+        print("Enter [S] to search now, \n      [P] to provide a maximum price,\n      [C] to specify a maximum number of connections,\n      [T] to specify a maximum trip time.\n")
         argument = input("[?]: ")
         if(argument.upper() == "S"):
             searched = True
@@ -428,14 +434,73 @@ def searchFlights(user):
             maxTime = input("[?]: ")
         else:
             print("Invalid entry, please retry.")
-    print("Beginning search query.")
-    time.sleep(2)
-# Handle booking
-def bookFlight(user):
-    return
+    
+    print("\n\nBeginning search query.")
+
+    query = """                 
+            WITH RECURSIVE connections(f_codes, frm, dest, hops, price, airtime, arrival) AS (
+              SELECT    airline_code || flight_number::text AS f_codes,
+                        depart_loc, 
+                        dest_loc,
+                        0 AS hops, 
+                        fc_price AS price,
+                        (arrival_time - depart_time) AS airtime,
+                        arrival_time
+              FROM flight f0
+              WHERE depart_loc = '{}' 
+              UNION ALL
+              SELECT con.f_codes || '-' || f1.airline_code || f1.flight_number::text as flight
+                        , con.frm
+                        , f1.dest_loc
+                        , con.hops + 1 AS hops
+                        , con.price + f1.fc_price as price
+                        , (con.airtime + (f1.arrival_time - f1.depart_time)) AS total_time
+                        , f1.arrival_time
+              FROM connections con
+                 JOIN flight f1
+                   ON f1.depart_loc = con.dest
+                   AND f1.depart_time > con.arrival 
+            )
+            SELECT *
+            FROM connections
+            WHERE dest = '{}'        
+    """.format(depAirport, desAirport)
+
+    flight_options = []
+    try:    
+        cursor.execute(query)
+        flight_options = cursor.fetchall();
+    except Exception as error:
+        print(error)
+
+    flight_options = [x for x in flight_options if x[3] <= float(maxConnections) and float(x[4]) <= float(maxPrice) and (x[5].seconds <= float(maxTime)*3600)]
+    if(len(flight_options) == 0):
+        print("No flights found for given parameters.")
+        time.sleep(2)
+        customerMenu()
+    
+    print("""Displaying flight options in the following format:
+
+        [i]: <# of connections>, $<airfare>, <total airtime> hrs 
+
+        """)
+
+    i = 0
+    for itin in flight_options:
+        print("        [{}]: {}, ${}, {:.3g} hrs".format(i, itin[3], float(itin[4]), (itin[5].seconds)/3600))
+        i +=1
+
+    print("\n")
+    print("Please choose a flight option to book flight \nelse type anything to return to main menu.\n")
+    bookit = input("[?]:")
+    
+    if(bookit.isdigit() and int(bookit) in range(i)):
+        bookFlight(user, flight_options[i])
+    else:
+
+        customerMenu(user)
+
 
 
 if __name__ == "__main__":
     initialPrompt()
-
-

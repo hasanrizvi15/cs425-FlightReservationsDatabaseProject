@@ -65,8 +65,9 @@ CREATE TABLE creditCard(
 	FOREIGN KEY (user_) REFERENCES customer (email),
 	FOREIGN KEY (userAddress)	REFERENCES address (address_id)
 );
+
 CREATE TABLE booking(
-	id				NUMERIC PRIMARY KEY,
+	id				SERIAL NOT NULL PRIMARY KEY,
 	class			VARCHAR,
 	paymentCard		NUMERIC,
 	user_			VARCHAR,
@@ -75,10 +76,11 @@ CREATE TABLE booking(
 );
 
 CREATE TABLE booking_flight(
-	bookingID		NUMERIC,
+	bookingID		INTEGER,
 	airline_code	VARCHAR(2),
 	flight_number	NUMERIC,
 	flight_date		DATE,
+	seats 			NUMERIC,
 	FOREIGN KEY (bookingID) REFERENCES booking (id),
 	FOREIGN KEY	(airline_code,flight_number,flight_date) REFERENCES flight(airline_code,flight_number,flight_date)
 );		
