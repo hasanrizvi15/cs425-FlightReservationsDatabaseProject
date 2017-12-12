@@ -107,11 +107,36 @@ def customerLogin():
             print(" Login Successful -- welcome, " + user[1] + "!")
             customerMenu(user)
 
+def bookingHandler(user):
+    print(user[1] +  "'s Bookings")
+    cmd = "SELECT * from booking WHERE user_= %s"
+    cursor.execute(cmd,(user[0],))
+    bookings = cursor.fetchall()
+    i = 0
+    for booking in bookings:
+        print("[{}]: Booking Number: {}, Class: {}.".format(i, booking[0],booking[1]))
+        cmd = "SELECT flight.airline_code, flight.flight_number, flight.flight_date, flight.depart_loc, flight.dest_loc, flight.depart_time, flight.arrival_time, flight.fc_capacity, flight.econ_capacity from booking_flight NATURAL JOIN flight WHERE bookingID= %s"
+        cursor.execute(cmd,(booking[0],))
+        flights = cursor.fetchall()
+        for flight in flights:
+            print("\t" + str(flight[0]) +" " + str(flight[1]) + " on " + str(flight[2]))
+            print("\t\tTakeoff at " + str(flight[5]) + " from " + flight[3])
+            print("\t\tLanding at " + str(flight[6]) + " at " + flight[4])
+        i += 1
+    print("If you wish to remove a booking, enter the booking's index [i]. Otherwise, hit return to go back to the main menu.")
+    i = input(" [?]: ")
+    if(i.isdigit()):
+        print("Removing booking with index " + i)
+        cmd = "DELETE FROM booking WHERE id= %s"
+        cursor.execute(cmd,(bookings[int(i)][0],))
+        time.sleep(2)	
+    conn.commit()
 def customerMenu(user):
     
     switch = {"1": addressHandler, 
-              "2": paymentHandler, 
-              "3": searchFlights, 
+              "2": paymentHandler,
+              "3": bookingHandler, 
+              "4": searchFlights, 
               "q": initialPrompt}
 
     print("\033c")
@@ -126,7 +151,9 @@ def customerMenu(user):
         |  |__________|_______________________________________| 
         |  |   (2)    | Manage Payment Methods                | 
         |  |__________|_______________________________________| 
-        |  |   (3)    | Search Flights                        | 
+        |  |   (3)    | Manage/View Bookings                  | 
+        |  |__________|_______________________________________| 
+        |  |   (4)    | Search For Flights                    | 
         |  |__________|_______________________________________| 
         |  |   (q)    | QUIT                                  | 
         |  |__________|_______________________________________| 
@@ -162,8 +189,6 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
     if(typeOfInsertion == "REG"):
         # insert into database a new customer
         cmd = "INSERT INTO customer (email,first_name,middle_init,last_name,home_airport) VALUES (%s,%s,%s,%s,%s);"
-        for i in args:
-            print(i)
         try:
             cursor.execute(cmd,(args[0],args[1],args[2],args[3],args[4]))
         except Exception as error:
@@ -178,9 +203,6 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
 
     elif(typeOfInsertion == "ADDR"):
         cmd = "INSERT INTO address (street, city, state, country, zip, user_) VALUES (%s,%s,%s,%s,%s,%s)"
-        for i in args:
-            print(i)
-
         try:
             cursor.execute(cmd,(args[0],args[1],args[2],args[3],args[4],args[5]))
         except Exception as error:
@@ -195,9 +217,6 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
 
     elif(typeOfInsertion == "PAYM"):
         cmd = "INSERT INTO creditCard (number,user_,useraddress) VALUES (%s,%s,%s)"
-        for i in args:
-            print(i)
-
         try:
             cursor.execute(cmd,(args[0],args[1],args[2]))
         except Exception as error:
@@ -211,15 +230,18 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
     elif(typeOfInsertion == "BOOK"):
         user = args[0]
         payment = args[1]
-        flights = args[2:]
+        class_ = args[2]
+        if(class_ == "econ_price"):
+            class_ = "ECONOMY"
+        else:
+            class_ = "FIRST"
+        flights = args[3:]
         cmd = "INSERT INTO booking (class,paymentCard,user_) VALUES (%s,%s,%s) RETURNING id"
-        cursor.execute(cmd,("FIRST",payment,user))
+        cursor.execute(cmd,(class_,payment,user))
         bookID = cursor.fetchone()[0]
-        print(bookID)
         time.sleep(4)
         for trip in flights:
             for flight in trip:
-                print(flight)
                 cmd = "INSERT INTO booking_flight (bookingID,airline_code,flight_number,flight_date,seats) VALUES (%s,%s,%s,%s,%s)"
 		
                 cursor.execute(cmd,(bookID,flight[10:12],flight[12:],flight[0:10],1))
@@ -251,6 +273,10 @@ def removeData(typeOfDeletion, pkey):
             return False
         conn.commit()
         return True
+    if(typeOfDeletion == "BOOK"):
+        cmd = "DELETE FROM booking WHERE id= %s"
+        cursor.execute(cmd,(pkey,))
+        
     return
 
     
@@ -342,7 +368,6 @@ def addressHandler(user):
 def displayCards(user):
     cursor.execute("SELECT number FROM creditCard WHERE user_='{}'".format(user[0]))
     ccards = cursor.fetchall()
-    print(ccards)
     print(user[1] + "'s Credit Cards\n")
     i = 0
     for cc in ccards: 
@@ -404,7 +429,7 @@ def paymentHandler(user):
     customerMenu(user)
 
 # Handle bookings
-def bookFlight(user, flight_list=[]):
+def bookFlight(user,class_,flight_list=[]):
     # TODO
     flightIDs = [flightID[0].split('/') for flightID in flight_list]
     print(len(flightIDs))
@@ -418,7 +443,7 @@ def bookFlight(user, flight_list=[]):
         else:
             print("Index out of range, please choose a credit card from the list")
             continue
-    insertData("BOOK",user[0],ccard[0],*flightIDs)
+    insertData("BOOK",user[0],ccard[0],class_,*flightIDs)
     time.sleep(3)          
     print(ccard[0]) 
     return
@@ -454,7 +479,6 @@ def searchFlights(user):
 	
     roundTrip = 0
     
-    class_ = "econ_price"
     yesNoReader = re.compile('^(Y|N).*')
     while(depAirport not in airports):
         print(" Please enter a departure airport (3-letter code). EXAMPLE: JFK")
@@ -515,13 +539,13 @@ def searchFlights(user):
     print("\n\n Beginning search query.\n")
     print(" Would you like to search for [E]conomy or [F]irst-class?\n")
     argument = input(" [?]: ")
-
+    class_ = ""
     if(argument.upper() == 'F'):
         print(" choosing first-class . . . ")
         class_ = "fc_price"
     else:
         print(" choosing economy . . . ")
-		
+        class_ = "econ_price"
     query = """                 
             WITH RECURSIVE connections(f_codes, frm, dest, hops, price, airtime, arrival) AS (
               SELECT    flight_date::text || airline_code || flight_number::text AS f_codes,
@@ -584,7 +608,7 @@ def searchFlights(user):
     if (roundTrip):
         ret_flight_options = []
         try:    
-            cursor.execute(query,(desAirport, depDate, depDate, depAirport))
+            cursor.execute(query,(desAirport, retDate, retDate, depAirport))
             ret_flight_options = cursor.fetchall();
 	
         except Exception as error:
@@ -613,9 +637,9 @@ def searchFlights(user):
 
     if(bookit.isdigit() and (int(bookit) < i)):
         if(roundTrip and ret_bookit.isdigit() and (int(ret_bookit) < j)):
-            bookFlight(user, [flight_options[int(bookit)], ret_flight_options[int(ret_bookit)]])
+            bookFlight(user,class_, [flight_options[int(bookit)], ret_flight_options[int(ret_bookit)]])
         else:
-            bookFlight(user, [flight_options[int(bookit)]])
+            bookFlight(user,class_, [flight_options[int(bookit)]])
     else:
         customerMenu(user)
 

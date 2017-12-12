@@ -81,7 +81,7 @@ CREATE TABLE booking_flight(
 	flight_number	NUMERIC,
 	flight_date		DATE,
 	seats 			NUMERIC,
-	FOREIGN KEY (bookingID) REFERENCES booking (id),
+	FOREIGN KEY (bookingID) REFERENCES booking (id) ON DELETE CASCADE,
 	FOREIGN KEY	(airline_code,flight_number,flight_date) REFERENCES flight(airline_code,flight_number,flight_date)
 );		
 INSERT INTO airport (id,name,country,state) VALUES ('ATL','Hartsfield-Jackson Atlanta International Airport','USA','GA'),('PHX','Phoenix Sky Harbor International Airport','USA','AZ'), ('LAX','Los Angeles International Airport','USA','CA'),('ORD','Chicago O''Hare International Airport','USA','IL'),('DFW','Dallas/Fort Worth International Airport','USA','TX');
