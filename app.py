@@ -408,7 +408,6 @@ def bookFlight(user, flight_list=[]):
     # TODO
     flightIDs = [flightID[0].split('/') for flightID in flight_list]
     print(len(flightIDs))
-        
     print("Please select the credit card you wish to use to pay for this booking.")
     while(True):
         ccards = displayCards(user)
@@ -452,7 +451,10 @@ def searchFlights(user):
     maxTime = float('inf')
     maxPrice = float('inf')
     maxConnections = float('inf')
+	
     roundTrip = 0
+    
+    class_ = "econ_price"
     yesNoReader = re.compile('^(Y|N).*')
     while(depAirport not in airports):
         print(" Please enter a departure airport (3-letter code). EXAMPLE: JFK")
@@ -510,40 +512,48 @@ def searchFlights(user):
         else:
             print(" Invalid entry, please retry.")
     
-    print("\n\n Beginning search query.")
+    print("\n\n Beginning search query.\n")
+    print(" Would you like to search for [E]conomy or [F]irst-class?\n")
+    argument = input(" [?]: ")
 
+    if(argument.upper() == 'F'):
+        print(" choosing first-class . . . ")
+        class_ = "fc_price"
+    else:
+        print(" choosing economy . . . ")
+		
     query = """                 
             WITH RECURSIVE connections(f_codes, frm, dest, hops, price, airtime, arrival) AS (
               SELECT    flight_date::text || airline_code || flight_number::text AS f_codes,
                         depart_loc, 
                         dest_loc,
                         0 AS hops, 
-                        fc_price AS price,
+                        {} AS price,
                         (arrival_time - depart_time) AS airtime,
                         arrival_time
               FROM flight f0
-              WHERE depart_loc = '{}' AND flight_date = '{}' 
+              WHERE depart_loc = %s AND flight_date = %s 
               UNION ALL
               SELECT con.f_codes || '/' || f1.flight_date::text || f1.airline_code || f1.flight_number::text as flight
                         , con.frm
                         , f1.dest_loc
                         , con.hops + 1 AS hops
-                        , con.price + f1.fc_price as price
+                        , con.price + f1.{} as price
                         , (con.airtime + (f1.arrival_time - f1.depart_time)) AS total_time
                         , f1.arrival_time
               FROM connections con
                  JOIN flight f1
-                   ON f1.depart_loc = con.dest AND flight_date = '{}'
+                   ON f1.depart_loc = con.dest AND flight_date = %s
                    AND f1.depart_time > con.arrival 
             )
             SELECT *
             FROM connections
-            WHERE dest = '{}'        
-    """
+            WHERE dest = %s        
+    """.format(class_, class_)
 
     flight_options = []
     try:    
-        cursor.execute(query.format(depAirport, depDate, depDate, desAirport))
+        cursor.execute(query,(depAirport, depDate, depDate, desAirport))
         flight_options = cursor.fetchall();
     except Exception as error:
         print(error)
@@ -565,8 +575,8 @@ def searchFlights(user):
         print("        [{}]: {}, ${}, {:.3g} hrs".format(i, itin[3], float(itin[4]), (itin[5].seconds)/3600))
         i +=1
 
-    print("\n")
-    print("Please choose a flight option to book flight \nelse type anything to return to main menu.\n")
+    
+    print("\n Please choose a flight option to book flight \nelse type anything to return to main menu.\n")
     bookit = input("[?]:")
     for itin in flight_options:
          print(itin)
@@ -574,7 +584,7 @@ def searchFlights(user):
     if (roundTrip):
         ret_flight_options = []
         try:    
-            cursor.execute(query.format(desAirport, retDate, retDate, depAirport))
+            cursor.execute(query,(desAirport, depDate, depDate, depAirport))
             ret_flight_options = cursor.fetchall();
 	
         except Exception as error:
