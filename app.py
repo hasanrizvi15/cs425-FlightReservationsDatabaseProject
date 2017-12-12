@@ -386,6 +386,7 @@ def paymentHandler(user):
 # Handle bookings
 def bookFlight(user, flight_list=[]):
     # TODO
+    print(flight_list)
     time.sleep(5)
     return
 
@@ -533,15 +534,18 @@ def searchFlights(user):
     print("\n")
     print("Please choose a flight option to book flight \nelse type anything to return to main menu.\n")
     bookit = input("[?]:")
+    for itin in flight_options:
+         print(itin)
 
     if (roundTrip):
         ret_flight_options = []
         try:    
-            cursor.execute(query.format(depAirport, retDate, retDate, desAirport))
+            cursor.execute(query.format(desAirport, retDate, retDate, depAirport))
             ret_flight_options = cursor.fetchall();
+	
         except Exception as error:
             print(error)
-
+        print(ret_flight_options)
         ret_flight_options = [x for x in ret_flight_options if x[3] <= float(maxConnections) and float(x[4]) <= float(maxPrice) and (x[5].seconds <= float(maxTime)*3600)]
         if(len(ret_flight_options) == 0):
             print("No return flights found for given parameters.")
