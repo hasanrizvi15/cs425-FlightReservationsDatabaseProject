@@ -395,7 +395,7 @@ def bookFlight(user, flight_list=[]):
     print(len(flightIDs))
     
 
-    #if(len(flightIDs) == 1):
+    if(len(flightIDs) == 1):
     return
 
 
@@ -488,7 +488,7 @@ def searchFlights(user):
             print(" Invalid entry, please retry.")
     
     print("\n\n Beginning search query.\n")
-    print(" Would you like to search for [E]conomy or [F]irst-class?\n")
+    2print(" Would you like to search for [E]conomy or [F]irst-class?\n")
     argument = input(" [?]: ")
 
     if(argument.upper() == 'F'):
@@ -559,7 +559,7 @@ def searchFlights(user):
     if (roundTrip):
         ret_flight_options = []
         try:    
-            cursor.execute(query,(depAirport, depDate, depDate, desAirport))
+            cursor.execute(query,(desAirport, depDate, depDate, depAirport))
             ret_flight_options = cursor.fetchall();
 	
         except Exception as error:
