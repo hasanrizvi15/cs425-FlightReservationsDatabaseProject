@@ -488,7 +488,7 @@ def searchFlights(user):
             print(" Invalid entry, please retry.")
     
     print("\n\n Beginning search query.\n")
-    2print(" Would you like to search for [E]conomy or [F]irst-class?\n")
+    print(" Would you like to search for [E]conomy or [F]irst-class?\n")
     argument = input(" [?]: ")
 
     if(argument.upper() == 'F'):
