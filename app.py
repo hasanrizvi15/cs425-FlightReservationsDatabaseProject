@@ -208,6 +208,11 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
             return False
         conn.commit()
         return True 
+    elif(typeOfInsertion == "BOOK"):
+        user = args[0]
+        payment = args[1]
+        flights = args[2:]
+        
     
 # Handle deletions/removals from tables
 def removeData(typeOfDeletion, pkey):
@@ -386,8 +391,12 @@ def paymentHandler(user):
 # Handle bookings
 def bookFlight(user, flight_list=[]):
     # TODO
-    print(flight_list)
-    time.sleep(5)
+    flightIDs = [flightID[0].split('-') for flightID in flight_list]
+    print(len(flightIDs))
+    
+
+    if(len(flightIDs) == 1):
+         
     return
 
 
