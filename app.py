@@ -212,8 +212,19 @@ def insertData(typeOfInsertion,*args): # Return False on insertion fail, True ot
         user = args[0]
         payment = args[1]
         flights = args[2:]
-        
-    
+        cmd = "INSERT INTO booking (class,paymentCard,user_) VALUES (%s,%s,%s) RETURNING id"
+        cursor.execute(cmd,("FIRST",payment,user))
+        bookID = cursor.fetchone()[0]
+        print(bookID)
+        time.sleep(4)
+        for trip in flights:
+            for flight in trip:
+                print(flight)
+                cmd = "INSERT INTO booking_flight (bookingID,airline_code,flight_number,flight_date,seats) VALUES (%s,%s,%s,%s,%s)"
+		
+                cursor.execute(cmd,(bookID,flight[10:12],flight[12:],flight[0:10],1))
+        conn.commit()
+        print("Your booking has been completed! Have a nice trip!") 
 # Handle deletions/removals from tables
 def removeData(typeOfDeletion, pkey):
     if(typeOfDeletion == "ADDR"):
@@ -328,6 +339,17 @@ def addressHandler(user):
     customerMenu(user)
 
 # Add/Modify Payment Methods
+def displayCards(user):
+    cursor.execute("SELECT number FROM creditCard WHERE user_='{}'".format(user[0]))
+    ccards = cursor.fetchall()
+    print(ccards)
+    print(user[1] + "'s Credit Cards\n")
+    i = 0
+    for cc in ccards: 
+        print("[{}]: {}".format(i, cc[0]))
+        i += 1
+    return ccards
+
 def paymentHandler(user):
     print("\033c")
     print("""  Please select an option from the list:
@@ -361,15 +383,8 @@ def paymentHandler(user):
     elif (option.lower() == "r"):
         success = 0
         try:
-            cursor.execute("SELECT number FROM creditCard WHERE user_='{}'".format(user[0]))
-        
-            ccards = cursor.fetchall()
-            print(ccards)
-            print(" Displaying credit cards, please select the card to be removed\n")
-            i = 0
-            for cc in ccards: 
-                print("[{}]: {}".format(i, cc[0]))
-                i += 1
+            print(" Displaying your credit cards, please select one to remove.")
+            ccards = displayCards(user)
             idx = int(input(" [?]: "))
             if(idx in range(len(ccards))):
                 success = removeData("PAYM", ccards[idx][0])
@@ -391,12 +406,22 @@ def paymentHandler(user):
 # Handle bookings
 def bookFlight(user, flight_list=[]):
     # TODO
-    flightIDs = [flightID[0].split('-') for flightID in flight_list]
+    flightIDs = [flightID[0].split('/') for flightID in flight_list]
     print(len(flightIDs))
-    
-
-    if(len(flightIDs) == 1):
-         
+        
+    print("Please select the credit card you wish to use to pay for this booking.")
+    while(True):
+        ccards = displayCards(user)
+        idx = int(input(" [?]: "))
+        if(idx in range(len(ccards))):
+            ccard = ccards[idx]
+            break
+        else:
+            print("Index out of range, please choose a credit card from the list")
+            continue
+    insertData("BOOK",user[0],ccard[0],*flightIDs)
+    time.sleep(3)          
+    print(ccard[0]) 
     return
 
 
@@ -489,7 +514,7 @@ def searchFlights(user):
 
     query = """                 
             WITH RECURSIVE connections(f_codes, frm, dest, hops, price, airtime, arrival) AS (
-              SELECT    airline_code || flight_number::text AS f_codes,
+              SELECT    flight_date::text || airline_code || flight_number::text AS f_codes,
                         depart_loc, 
                         dest_loc,
                         0 AS hops, 
@@ -499,7 +524,7 @@ def searchFlights(user):
               FROM flight f0
               WHERE depart_loc = '{}' AND flight_date = '{}' 
               UNION ALL
-              SELECT con.f_codes || '-' || f1.airline_code || f1.flight_number::text as flight
+              SELECT con.f_codes || '/' || f1.flight_date::text || f1.airline_code || f1.flight_number::text as flight
                         , con.frm
                         , f1.dest_loc
                         , con.hops + 1 AS hops
